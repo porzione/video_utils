@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint dateparser pymediainfo
+        pip install pylint dateparser pymediainfo python-magic
     - name: Analysing the code with pylint
       run: |
         pylint --rcfile .pylintrc $(git ls-files '*.py')
