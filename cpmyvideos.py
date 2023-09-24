@@ -6,9 +6,9 @@ copy / dnxhd encode videos to dnxhd
 import argparse
 from timeit import default_timer as timer
 import os
-import mimetypes
 import shutil
 #from pprint import pprint
+import magic
 import dateparser
 from pymediainfo import MediaInfo
 from lib import format_time, run_cmd
@@ -57,14 +57,17 @@ def get_minfo(in_filename):
     return minfo
 
 def v_transcode(src, dst, info):
-    cmd = ['ffmpeg', '-i', src]
+    cmd = ['ffmpeg', '-hide_banner', '-i', src,]
 
-    params = {
-        'vcodec': 'dnxhd',
-        'profile:v': 'dnxhr_hq',
-        'pix_fmt': 'yuv422p',
-        'map_metadata': '0'
-    }
+    if mi['is_hq']:
+        params = { 'c:v': 'copy' }
+    else:
+        params = {
+            'c:v': 'dnxhd',
+            'profile:v': 'dnxhr_hq',
+            'pix_fmt': 'yuv422p'
+        }
+    params['map_metadata'] = '0'
 
     if info['audio_fmt'] is None:
         cmd.append('-an')
@@ -96,16 +99,14 @@ for filename in os.listdir(args.srcdir):
             print(f'EXISTS {dst_file}')
             continue
 
-        mime_type, _enc = mimetypes.guess_type(src_file)
+        mime_type = magic.from_file(src_file, mime=True)
+        print(f'MIME 0 {mime_type}')
         if not mime_type or not mime_type.startswith('video'):
             continue
         print(f'FILE {src_file}')
         print(f'MIME {mime_type}')
 
         mi = get_minfo(src_file)
-        if mi['is_hq']:
-            print('already HQ video')
-            continue
 
         mod_time = os.path.getmtime(src_file)
         if args.newer and mod_time < newer_time:
@@ -118,7 +119,7 @@ for filename in os.listdir(args.srcdir):
             v_transcode(src_file, dst_file, mi)
 
         end_time = timer() - start_time
-        print(f"TIME {format_time(end_time)}")
+        print(f"TIME {format_time(end_time)}\n")
         TOTAL_TIME += end_time
 
 print(f"TOTAL TIME: {format_time(TOTAL_TIME)}")

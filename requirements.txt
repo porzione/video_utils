@@ -1,4 +1,5 @@
-# or `yay -S python-dateparser python-pymediainfo`
+# Arch: `yay -S python-dateparser python-pymediainfo python-magic`
 dateparser
+python-magic
 pymediainfo
 
