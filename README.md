@@ -1,2 +1,6 @@
-# video_utils
-home video utils - copy/convert/etc using ffmpeg and mediainfo
+# `video_utils`
+
+`cpmyvideos.py` copy videos and convert to DNxHD
+
+`youtube.py` convert to suitable YouTube format
+

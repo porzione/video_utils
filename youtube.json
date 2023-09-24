@@ -1,0 +1,50 @@
+{
+  "SDR": [
+    {
+      "Category": "Standard Frame Rate",
+      "FrameRates": [24, 25, 30],
+      "Bitrates": {
+        "2160p": [35,45],
+        "1440p": 16,
+        "1080p": 8,
+        "720p": 5,
+        "480p": 2.5,
+        "360p": 1
+      }
+    },
+    {
+      "Category": "High Frame Rate",
+      "FrameRates": [48, 50, 60],
+      "Bitrates": {
+        "2160p": [53,68],
+        "1440p": 24,
+        "1080p": 12,
+        "720p": 7.5,
+        "480p": 4,
+        "360p": 1.5
+      }
+    }
+  ],
+  "HDR": [
+    {
+      "Category": "Standard Frame Rate",
+      "FrameRates": [24, 25, 30],
+      "Bitrates": {
+        "2160p": [44,56],
+        "1440p": 20,
+        "1080p": 10,
+        "720p": "6.5"
+      }
+    },
+    {
+      "Category": "High Frame Rate",
+      "FrameRates": [48, 50, 60],
+      "Bitrates": {
+        "2160p": [66,85],
+        "1440p": 20,
+        "1080p": 15,
+        "720p": "9.5"
+      }
+    }
+  ]
+}

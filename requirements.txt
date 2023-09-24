@@ -1,0 +1,4 @@
+# or `yay -S python-dateparser python-pymediainfo`
+dateparser
+pymediainfo
+
