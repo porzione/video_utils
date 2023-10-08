@@ -13,15 +13,13 @@ import dateparser
 from pymediainfo import MediaInfo
 from lib import format_time, run_cmd
 
-# HD FHD 2K UHD 4K
-# dnxhr_resolutions = ['1280x720', '1920x1080', '2048x1080', '3840x2160', '4096x2160']
-
 parser = argparse.ArgumentParser(description='Video Copy Script')
 # parser.add_argument('-D', '--debug', action='store_true', help='Enable debug output')
 parser.add_argument('-s', '--srcdir', help='Source directory')
 parser.add_argument('-d', '--dstdir', help='Destination directory')
 parser.add_argument('-n', '--newer', help='Newer than')
 parser.add_argument('--copy', action='store_true', help='Copy as is')
+parser.add_argument('--keephr', action='store_true', help='Keep hi-res, do not convert to 1440')
 args = parser.parse_args()
 
 if args.srcdir is None:
@@ -49,6 +47,9 @@ def get_minfo(in_filename):
             print(f'Bit depth: {track.bit_depth}')
             print(f'Format: {track.format}')
             print(f'Color: {track.color_space} {track.chroma_subsampling}')
+            minfo['height'] = track.height
+            minfo['bit_depth'] = track.bit_depth
+            minfo['frame_rate'] = track.frame_rate
             if track.format in ['VC-3', 'FFV1', 'ProRes', 'HFYU']:
                 minfo['is_hq'] = True
         elif track.track_type == 'Audio':
@@ -56,18 +57,63 @@ def get_minfo(in_filename):
             print(f"Audio: {minfo['audio_fmt']} {track.bit_depth} bit")
     return minfo
 
+
+def calculate_dnxhr_bitrate(resolution, profile, frame_rate, bit_depth):
+    base_bitrates = {
+        'dnxhr_lb': 92,
+        'dnxhr_sq': 410,
+        'dnxhr_hq': 880,
+        'dnxhr_hqx': 1100,
+        'dnxhr_444': 1900
+    }
+
+    if profile not in base_bitrates:
+        raise ValueError("Invalid DNxHR profile")
+    if profile == 'dnxhr_hq' and bit_depth != 8:
+        raise ValueError("HQ profile supports only 8-bit depth")
+    if (profile in ['dnxhr_hqx', 'dnxhr_444']) and bit_depth != 10:
+        raise ValueError("HQX and 444 profiles support only 10-bit depth")
+
+    base_resolution = 1080
+    resolution_scale = resolution / base_resolution
+    frame_rate_scale = float(frame_rate) / 30
+    final_bitrate_mbps = base_bitrates[profile] * resolution_scale * frame_rate_scale
+    final_bitrate_MB = final_bitrate_mbps / 8
+
+    print(f"Calculated bit rate: {final_bitrate_MB:.2f} MB/s")
+    return final_bitrate_MB
+
 def v_transcode(src, dst, info):
+    # 8 bit hq
+    PARAMS_HQ = {
+        'c:v': 'dnxhd',
+        'profile:v': 'dnxhr_hq',
+        'pix_fmt': 'yuv422p'
+    }
+
     cmd = ['ffmpeg', '-hide_banner', '-i', src,]
 
     if mi['is_hq']:
         params = { 'c:v': 'copy' }
     else:
-        params = {
-            'c:v': 'dnxhd',
-            'profile:v': 'dnxhr_hq',
-            'pix_fmt': 'yuv422p'
-        }
+        params = PARAMS_HQ
+
+    if mi['height'] > 1440 and not args.keephr:
+        params['vf'] = 'scale=-1:1440'
+        params['movflags'] = 'write_colr+use_metadata_tags'
+        if mi['bit_depth'] == 10:
+            params['pix_fmt'] = 'yuv422p10le'
+            params['profile:v'] = 'dnxhr_hqx'
+        bit_rate = calculate_dnxhr_bitrate(1440,
+                                           params['profile:v'],
+                                           mi['frame_rate'],
+                                           mi['bit_depth'])
+        params['b:v'] = f'{int(bit_rate)}M'
+
+    # for panasonic xml meta: movflags=use_metadata_tags
     params['map_metadata'] = '0'
+    params['map_metadata:s:v'] = '0:s:v'
+    params['map_metadata:s:a'] = '0:s:a'
 
     if info['audio_fmt'] is None:
         cmd.append('-an')
@@ -100,7 +146,6 @@ for filename in os.listdir(args.srcdir):
             continue
 
         mime_type = magic.from_file(src_file, mime=True)
-        print(f'MIME 0 {mime_type}')
         if not mime_type or not mime_type.startswith('video'):
             continue
         print(f'FILE {src_file}')
