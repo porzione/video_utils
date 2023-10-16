@@ -13,13 +13,16 @@ import dateparser
 from pymediainfo import MediaInfo
 from lib import format_time, run_cmd
 
+DEF_RES = 1440
+
 parser = argparse.ArgumentParser(description='Video Copy Script')
 # parser.add_argument('-D', '--debug', action='store_true', help='Enable debug output')
 parser.add_argument('-s', '--srcdir', help='Source directory')
 parser.add_argument('-d', '--dstdir', help='Destination directory')
 parser.add_argument('-n', '--newer', help='Newer than')
 parser.add_argument('--copy', action='store_true', help='Copy as is')
-parser.add_argument('--keephr', action='store_true', help='Keep hi-res, do not convert to 1440')
+parser.add_argument('--keephr', action='store_true',
+                    help=f'Keep hi-res, do not convert to {DEF_RES}')
 args = parser.parse_args()
 
 if args.srcdir is None:
@@ -98,13 +101,13 @@ def v_transcode(src, dst, info):
     else:
         params = PARAMS_HQ
 
-    if mi['height'] > 1440 and not args.keephr:
-        params['vf'] = 'scale=-1:1440'
+    if mi['height'] > DEF_RES and not args.keephr:
+        params['vf'] = f'scale=-1:{DEF_RES}'
         params['movflags'] = 'write_colr+use_metadata_tags'
         if mi['bit_depth'] == 10:
             params['pix_fmt'] = 'yuv422p10le'
             params['profile:v'] = 'dnxhr_hqx'
-        bit_rate = calculate_dnxhr_bitrate(1440,
+        bit_rate = calculate_dnxhr_bitrate(DEF_RES,
                                            params['profile:v'],
                                            mi['frame_rate'],
                                            mi['bit_depth'])
