@@ -423,8 +423,10 @@ confidence=HIGH,
 # --disable=W".
 disable=missing-class-docstring,
         invalid-name,
-        missing-function-docstring
-        
+        missing-function-docstring,
+        pointless-string-statement,
+        too-many-branches,
+        too-many-statements
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -571,6 +573,7 @@ ignored-checks-for-mixins=no-member,
                           not-async-context-manager,
                           not-context-manager,
                           attribute-defined-outside-init
+
 
 # List of class names for which member attributes should not be checked (useful
 # for classes with dynamically set attributes). This supports the use of

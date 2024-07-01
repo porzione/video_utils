@@ -14,8 +14,10 @@ def format_time(seconds):
     return f"{minutes:02d}:{remaining_seconds:06.3f}"
 
 
-def run_cmd(cmd):
-    print(f'COMMAND: {cmd}')
+def run_cmd(cmd, dry=False):
+    print(f"COMMAND: {' '.join(cmd)}")
+    if dry:
+        return
 
     def reader_thread(pipe, process):
         for line in iter(pipe.readline, b''):
