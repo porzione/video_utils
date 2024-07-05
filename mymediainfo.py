@@ -26,6 +26,15 @@ class MyMediaInfo:
     def format(self):
         return self.video_track.format if self.video_track else None
 
+    def format_profile(self):
+        return self.video_track.format_profile if self.video_track else None
+
+    def format_settings(self):
+        return self.video_track.format_settings if self.video_track else None
+
+    def color_space(self):
+        return self.video_track.color_space if self.video_track else None
+
     def width(self):
         return self.video_track.width if self.video_track else None
 
@@ -38,8 +47,17 @@ class MyMediaInfo:
     def video_data(self):
         return self.video_track.to_data()
 
+    def has_audio(self):
+        return self.audio_track is not None
+
     def audio_format(self):
         return self.audio_track.format if self.audio_track else None
+
+    def audio_channels(self):
+        return self.audio_track.channel_s if self.audio_track else None
+
+    def audio_sampling_rate(self):
+        return self.audio_track.sampling_rate if self.audio_track else None
 
     def audio_data(self):
         return self.audio_track.to_data()
@@ -54,8 +72,10 @@ class MyMediaInfo:
         print(f"Bit rate: {self.bit_rate()}")
         print(f'Bit depth: {self.bit_depth()}')
         print(f'Format: {self.format()}')
-        print(f'Color space: {self.video_track.color_space}')
+        print(f'Format profile: {self.format_profile()}')
+        print(f'Format settings: {self.format_settings()}')
+        print(f'Color space: {self.color_space()}')
         print(f'Chroma subsampling: {self.video_track.chroma_subsampling}')
         print(f"Audio format: {self.audio_format()}")
-        print(f"Audio sampling rate: {self.audio_track.sampling_rate}")
-        print(f"Audio channels: {self.audio_track.channel_s}")
+        print(f"Audio sampling rate: {self.audio_sampling_rate()}")
+        print(f"Audio channels: {self.audio_channels()}")

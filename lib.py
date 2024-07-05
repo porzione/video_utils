@@ -5,6 +5,8 @@ helpers lib
 import subprocess
 import threading
 
+ENCODERS = ('sw', 'amf', 'vaapi', 'nv')
+
 def format_time(seconds):
     if seconds < 60:
         return f"{seconds:.3f}s"

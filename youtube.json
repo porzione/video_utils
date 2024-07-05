@@ -4,6 +4,7 @@
       "Category": "Standard Frame Rate",
       "FrameRates": [24, 25, 30],
       "Bitrates": {
+        "4320p": [80, 160],
         "2160p": [35,45],
         "1440p": 16,
         "1080p": 8,
@@ -16,6 +17,7 @@
       "Category": "High Frame Rate",
       "FrameRates": [48, 50, 60],
       "Bitrates": {
+        "4320p": [120, 240],
         "2160p": [53,68],
         "1440p": 24,
         "1080p": 12,
@@ -30,6 +32,7 @@
       "Category": "Standard Frame Rate",
       "FrameRates": [24, 25, 30],
       "Bitrates": {
+        "4320p": [100, 200],
         "2160p": [44,56],
         "1440p": 20,
         "1080p": 10,
@@ -40,8 +43,9 @@
       "Category": "High Frame Rate",
       "FrameRates": [48, 50, 60],
       "Bitrates": {
+        "4320p": [150, 300],
         "2160p": [66,85],
-        "1440p": 20,
+        "1440p": 30,
         "1080p": 15,
         "720p": "9.5"
       }
