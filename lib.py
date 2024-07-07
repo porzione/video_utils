@@ -7,6 +7,13 @@ import threading
 
 ENCODERS = ('sw', 'amf', 'vaapi', 'nv')
 
+VAAPI_IN = {
+    'threads': '1',
+    'hwaccel': 'vaapi',
+    'hwaccel_output_format': 'vaapi',
+    'vaapi_device': '/dev/dri/renderD128',
+}
+
 def format_time(seconds):
     if seconds < 60:
         return f"{seconds:.3f}s"

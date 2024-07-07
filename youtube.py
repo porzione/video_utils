@@ -11,11 +11,12 @@ import json
 import argparse
 #from pprint import pprint, pformat
 from mymediainfo import MyMediaInfo
-from lib import run_cmd, ENCODERS
+from lib import run_cmd, ENCODERS, VAAPI_IN
 
 class YouTube:
 
     DEFAULT_YT_CATEGORY = 'HDR'
+    DEFAULT_CRF = '20'
 
     def __init__(self):
         parser = argparse.ArgumentParser()
@@ -26,14 +27,14 @@ class YouTube:
         parser.add_argument('--yt-cat', dest='yt_cat', type=str,
                           default=self.DEFAULT_YT_CATEGORY,
                           help='YouTube category (default: %(default)s)')
-        parser.add_argument('--crf', help='CRF / CQP / disable bitrate control')
+        parser.add_argument('--crf', default=self.DEFAULT_CRF, help='CRF')
         parser.add_argument('--enc', default='sw',
                             help='Encoder (%(default)s)')
         parser.add_argument('--opencl', action='store_true')
         parser.add_argument('--deint', action='store_true',
                             help='deinterlace')
         parser.add_argument('--preset', default='slow',
-                            help='ffmpeg preset (%(default)s)')
+                            help='preset (%(default)s)')
         parser.add_argument('-t', dest='duration')
         parser.add_argument('--dry', action='store_true',
                             help='Dry run')
@@ -87,7 +88,7 @@ class YouTube:
         print(f"YT GOP: {self.gop}")
 
     def run(self):
-        cmd = ['ffmpeg', '-hide_banner', '-nostdin']
+        cmd = ['ffmpeg', '-hide_banner', '-nostdin', '-ignore_editlist', '1']
         params_in = {}
         filter_v = {}
         match self.args.enc:
@@ -105,12 +106,7 @@ class YouTube:
                     params['qp_b'] = self.args.crf
             case 'vaapi':
                 # ffmpeg -hide_banner -h encoder=h264_vaapi|less
-                params_in = {
-                    'threads': '1',
-                    'hwaccel': 'vaapi',
-                    'hwaccel_output_format': 'vaapi',
-                    'vaapi_device': '/dev/dri/renderD128',
-                }
+                params_in = VAAPI_IN
                 params = {
                     'c:v': 'h264_vaapi',
                     'compression_level': '29',
@@ -130,16 +126,16 @@ class YouTube:
                 }
                 params = {
                     'c:v': 'h264_nvenc',
-                    'preset': 'p5', # p6,p7
-                    'tune': 'hq',
-                    'profile': 'high',
+                    'preset:v': 'p7',
+                    'tune:v': 'hq',
+                    'rc:v': 'vbr',
+                    'cq:v': self.args.crf,
+                    'b:v': '0',
+                    #'tier': 'high',
+                    #'profile:v' 'high',
                 }
                 if self.mi.bit_depth() == 10:
-                    filter_v['format'] = 'p010le'
-                if self.args.crf:
-                    params['fps_mode'] = 'passthrough'
-                    params['rc'] = 'constqp'
-                    params['qp'] = self.args.crf
+                    params['profile:v'] = 'main10'
             case 'sw':
                 params = {
                     'c:v': 'libx264',

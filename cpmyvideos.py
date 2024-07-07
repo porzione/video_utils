@@ -12,7 +12,7 @@ import shutil
 import magic
 import dateparser
 from mymediainfo import MyMediaInfo
-from lib import format_time, run_cmd, ENCODERS
+from lib import format_time, run_cmd, ENCODERS, VAAPI_IN
 
 RESOLUTIONS = ('720', '1080', '1440', '1620', '2160')
 DEF_RES = '1440'
@@ -141,12 +141,7 @@ def v_transcode(src, dst, info):
             case 'vaapi':
                 # https://trac.ffmpeg.org/wiki/Hardware/VAAPI
                 # https://ffmpeg.org//ffmpeg-codecs.html#VAAPI-encoders
-                params_in = {
-                    'threads': '1',
-                    'hwaccel': 'vaapi',
-                    'hwaccel_output_format': 'vaapi',
-                    'vaapi_device': '/dev/dri/renderD128',
-                }
+                params_in = VAAPI_IN
                 params = {
                     'c:v': 'hevc_vaapi',
                     'rc_mode': 'CQP',
@@ -200,12 +195,7 @@ def v_transcode(src, dst, info):
                     'usage': 'transcoding',
                 }
             case 'vaapi':
-                params_in = {
-                    'threads': '1',
-                    'hwaccel': 'vaapi',
-                    'hwaccel_output_format': 'vaapi',
-                    'vaapi_device': '/dev/dri/renderD128',
-                }
+                params_in = VAAPI_IN
                 params = {
                     'c:v': 'av1_vaapi',
                     'compression_level': '29',
