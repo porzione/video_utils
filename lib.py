@@ -19,7 +19,7 @@ def format_time(seconds):
 def run_cmd(cmd, dry=False):
     print(f"COMMAND: {' '.join(cmd)}")
     if dry:
-        return
+        return 0
 
     def reader_thread(pipe, process):
         for line in iter(pipe.readline, b''):
@@ -42,5 +42,6 @@ def run_cmd(cmd, dry=False):
         stdout_thread.join()
         stderr_thread.join()
 
-        if return_code != 0:
-            print(f"Failed with return code: {return_code}")
+        #if return_code != 0:
+        #    print(f"Failed with return code: {return_code}")
+        return return_code

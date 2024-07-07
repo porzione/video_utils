@@ -104,6 +104,7 @@ class YouTube:
                     params['qp_p'] = self.args.crf
                     params['qp_b'] = self.args.crf
             case 'vaapi':
+                # ffmpeg -hide_banner -h encoder=h264_vaapi|less
                 params_in = {
                     'threads': '1',
                     'hwaccel': 'vaapi',

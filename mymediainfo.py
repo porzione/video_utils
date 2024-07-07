@@ -44,6 +44,12 @@ class MyMediaInfo:
     def frame_rate(self):
         return self.video_track.frame_rate if self.video_track else None
 
+    def is_interlaced(self):
+        return self.video_track.scan_type != 'Progressive'
+
+    def is_hq(self):
+        return self.format() in ['VC-3', 'FFV1', 'ProRes', 'HFYU']
+
     def video_data(self):
         return self.video_track.to_data()
 
@@ -62,11 +68,6 @@ class MyMediaInfo:
     def audio_data(self):
         return self.audio_track.to_data()
 
-    def is_hq(self):
-        if self.format() in ['VC-3', 'FFV1', 'ProRes', 'HFYU']:
-            return True
-        return False
-
     def print(self):
         print(f'Video: {self.width()}x{self.height()} @ {self.frame_rate()}')
         print(f"Bit rate: {self.bit_rate()}")
@@ -74,8 +75,8 @@ class MyMediaInfo:
         print(f'Format: {self.format()}')
         print(f'Format profile: {self.format_profile()}')
         print(f'Format settings: {self.format_settings()}')
-        print(f'Color space: {self.color_space()}')
-        print(f'Chroma subsampling: {self.video_track.chroma_subsampling}')
+        print(f'Scan: {self.video_track.scan_type}')
+        print(f'Color: {self.color_space()} {self.video_track.chroma_subsampling}')
         print(f"Audio format: {self.audio_format()}")
         print(f"Audio sampling rate: {self.audio_sampling_rate()}")
         print(f"Audio channels: {self.audio_channels()}")
