@@ -11,7 +11,7 @@ VAAPI_IN = {
     'threads': '1',
     'hwaccel': 'vaapi',
     'hwaccel_output_format': 'vaapi',
-    'vaapi_device': '/dev/dri/renderD128',
+    #'vaapi_device': '/dev/dri/renderD128',
 }
 
 def format_time(seconds):

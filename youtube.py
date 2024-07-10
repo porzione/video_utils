@@ -16,7 +16,7 @@ from lib import run_cmd, ENCODERS, VAAPI_IN
 class YouTube:
 
     DEFAULT_YT_CATEGORY = 'HDR'
-    DEFAULT_CRF = '20'
+    DEFAULT_CRF = '18'
 
     def __init__(self):
         parser = argparse.ArgumentParser()
