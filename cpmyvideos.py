@@ -6,17 +6,12 @@ from timeit import default_timer as timer
 import os
 import sys
 import shutil
+import importlib
 import magic
 import dateparser
 from mymediainfo import MyMediaInfo
 import lib
 import enc_dnxhr
-import enc_hevc_amf     # pylint: disable=unused-import
-import enc_hevc_nv      # pylint: disable=unused-import
-import enc_hevc_nvenc   # pylint: disable=unused-import
-import enc_hevc_vaapi   # pylint: disable=unused-import
-import enc_hevc_vceenc  # pylint: disable=unused-import
-import enc_hevc_x265    # pylint: disable=unused-import
 
 # 1920x1080 2560x1440 3840x2160
 RESOLUTIONS = (1080, 1440, 2160)
@@ -79,7 +74,7 @@ crf = args.crf if args.crf else lib.CRF.get(args.enc) or lib.CRF.get(args.fmt)
 if args.newer:
     args.newer = dateparser.parse(args.newer).timestamp()
 
-def transcode(src, dst, info, encoder_name):
+def transcode(src, dst, info, enc_mod):
     video = lib.Video(
         bits = args.bits or 10,
         bits_in = info.bit_depth,
@@ -95,7 +90,7 @@ def transcode(src, dst, info, encoder_name):
         matrix_coefficients = info.matrix_coefficients,
         transfer_characteristics = info.transfer_characteristics,
     )
-    encoder = globals()[encoder_name].Encoder(video)
+    encoder = enc_mod.Encoder(video)
 
     if hasattr(encoder, 'CMD'):
         cmd = encoder.CMD.copy()
@@ -180,9 +175,10 @@ def copy(src, dst):
 
 
 if args.fmt == 'dnxhr':
-    ENC_NAME = 'enc_dnxhr'
+    ENC_MOD = enc_dnxhr
 elif args.fmt == 'hevc':
-    ENC_NAME = f'enc_{args.fmt}_{args.enc}'
+    ENC_MOD = importlib.import_module(f'enc_{args.fmt}_{args.enc}')
+
 else:
     raise ValueError(f"Unsupported encoder format/type: {args.fmt}{args.enc}")
 
@@ -246,7 +242,7 @@ for filename in os.listdir(args.srcdir):
         if args.copy:
             copy(src_file, dst_file)
         else:
-            RC = transcode(src_file, dst_file, mi, ENC_NAME)
+            RC = transcode(src_file, dst_file, mi, ENC_MOD)
             if RC != 0:
                 print(f'transcode failed with code: {RC}')
                 if os.path.exists(dst_file) and os.path.getsize(dst_file) == 0:
