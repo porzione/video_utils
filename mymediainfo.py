@@ -1,12 +1,37 @@
-"""
-OO wrapper for pymediainfo
-"""
+""" OO wrapper for pymediainfo """
 
+from dataclasses import dataclass
+from typing import Optional
 from pymediainfo import MediaInfo
 
+@dataclass
 class MyMediaInfo:
-    def __init__(self, file_name):
-        self.media_info = MediaInfo.parse(file_name)
+    # pylint: disable=too-many-instance-attributes
+
+    file_name: str
+    bit_rate: float = None # Mbps
+    bit_depth: int = None
+    format: str = None
+    format_profile: Optional[str] = None
+    format_settings: Optional[str] = None
+    color_primaries: Optional[str] = None
+    color_format: Optional[str] = None
+    transfer_characteristics: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    frame_rate: Optional[float] = None
+    color_primaries: Optional[str] = None
+    color_range: Optional[str] = None
+    matrix_coefficients: Optional[str] = None
+    is_interlaced: Optional[bool] = None
+    is_hq: Optional[bool] = None
+    has_audio: Optional[bool] = None
+    audio_format: Optional[str] = None
+    audio_channels: Optional[int] = None
+    audio_sampling_rate: Optional[str] = None
+
+    def __post_init__(self):
+        self.media_info = MediaInfo.parse(self.file_name)
         self.video_track = None
         self.audio_track = None
 
@@ -16,67 +41,56 @@ class MyMediaInfo:
             elif track.track_type == 'Audio' and self.audio_track is None:
                 self.audio_track = track
 
-    def bit_rate(self):
-        # Mbps float
-        return (self.video_track.bit_rate/1000000.0) if self.video_track else None
+        if self.video_track:
+            # Mbps float
+            self.bit_rate = self.video_track.bit_rate / 1000000.0
+            self.bit_depth = self.video_track.bit_depth
+            self.format = self.video_track.format
 
-    def bit_depth(self):
-        return self.video_track.bit_depth if self.video_track else None
+            self.format_profile = self.video_track.format_profile
+            self.format_settings = self.video_track.format_settings
+            self.color_primaries = self.video_track.color_space
 
-    def format(self):
-        return self.video_track.format if self.video_track else None
+            cspace = self.video_track.color_space.lower()
+            chroma = self.video_track.chroma_subsampling.replace(':', '')
+            self.color_format = f'{cspace}{chroma}'
 
-    def format_profile(self):
-        return self.video_track.format_profile if self.video_track else None
+            self.width = self.video_track.width
+            self.height = self.video_track.height
+            self.frame_rate = self.video_track.frame_rate
+            self.color_primaries = self.video_track.color_primaries
+            self.matrix_coefficients = self.video_track.matrix_coefficients
+            self.transfer_characteristics = self.video_track.transfer_characteristics
+            self.color_range = self.video_track.color_range
+            self.is_interlaced = self.video_track.scan_type != 'Progressive'
+            self.is_hq = self.format in ['VC-3', 'FFV1', 'ProRes', 'HFYU']
+            self.has_audio = self.audio_track is not None
 
-    def format_settings(self):
-        return self.video_track.format_settings if self.video_track else None
+        if self.audio_track:
+            self.audio_format = self.audio_track.format
+            self.audio_channels = self.audio_track.channel_s
+            self.audio_sampling_rate = self.audio_track.sampling_rate
 
-    def color_space(self):
-        return self.video_track.color_space if self.video_track else None
-
-    def width(self):
-        return self.video_track.width if self.video_track else None
-
-    def height(self):
-        return self.video_track.height if self.video_track else None
-
-    def frame_rate(self):
-        return self.video_track.frame_rate if self.video_track else None
-
-    def is_interlaced(self):
-        return self.video_track.scan_type != 'Progressive'
-
-    def is_hq(self):
-        return self.format() in ['VC-3', 'FFV1', 'ProRes', 'HFYU']
 
     def video_data(self):
         return self.video_track.to_data()
-
-    def has_audio(self):
-        return self.audio_track is not None
-
-    def audio_format(self):
-        return self.audio_track.format if self.audio_track else None
-
-    def audio_channels(self):
-        return self.audio_track.channel_s if self.audio_track else None
-
-    def audio_sampling_rate(self):
-        return self.audio_track.sampling_rate if self.audio_track else None
 
     def audio_data(self):
         return self.audio_track.to_data()
 
     def print(self):
-        print(f'Video: {self.width()}x{self.height()} @ {self.frame_rate()}')
-        print(f"Bit rate: {self.bit_rate()}")
-        print(f'Bit depth: {self.bit_depth()}')
-        print(f'Format: {self.format()}')
-        print(f'Format profile: {self.format_profile()}')
-        print(f'Format settings: {self.format_settings()}')
+        print(f'Video: {self.width}x{self.height} @ {self.frame_rate}')
+        print(f'Bit rate: {self.bit_rate}')
+        print(f'Bit depth: {self.bit_depth}')
+        print(f'Format: {self.format}')
+        print(f'Format profile: {self.format_profile}')
+        print(f'Format settings: {self.format_settings}')
+        print(f'Color format: {self.color_format}')
+        print(f'Color primaries: {self.color_primaries}')
+        print(f'Matrix coefficients: {self.matrix_coefficients}')
+        print(f'Transfer characteristics: {self.transfer_characteristics}')
+        print(f'Color range: {self.color_range}')
         print(f'Scan: {self.video_track.scan_type}')
-        print(f'Color: {self.color_space()} {self.video_track.chroma_subsampling}')
-        print(f"Audio format: {self.audio_format()}")
-        print(f"Audio sampling rate: {self.audio_sampling_rate()}")
-        print(f"Audio channels: {self.audio_channels()}")
+        print(f'Audio format: {self.audio_format}')
+        print(f'Audio sampling rate: {self.audio_sampling_rate}')
+        print(f'Audio channels: {self.audio_channels}')

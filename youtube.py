@@ -11,7 +11,8 @@ import json
 import argparse
 #from pprint import pprint, pformat
 from mymediainfo import MyMediaInfo
-from lib import run_cmd, ENCODERS, VAAPI_IN
+from lib import run_cmd, ENCODERS
+import enc_hevc_vaapi
 
 class YouTube:
 
@@ -70,8 +71,8 @@ class YouTube:
         return int(estimated_bitrate)
 
     def get_params(self):
-        height_p = f'{self.mi.height()}p'
-        frame_rate = int(float(self.mi.frame_rate()))
+        height_p = f'{self.mi.height}p'
+        frame_rate = int(float(self.mi.frame_rate))
         for mode in self.conf[self.args.yt_cat]:
             if frame_rate in mode['FrameRates'] and height_p in mode['Bitrates']:
                 self.vbitrate = mode['Bitrates'][height_p]
@@ -106,13 +107,13 @@ class YouTube:
                     params['qp_b'] = self.args.crf
             case 'vaapi':
                 # ffmpeg -hide_banner -h encoder=h264_vaapi|less
-                params_in = VAAPI_IN
+                params_in = enc_hevc_vaapi.PARAMS_IN
                 params = {
                     'c:v': 'h264_vaapi',
                     'compression_level': '29',
                     # 'quality': '0' # def -1
                 }
-                if self.mi.bit_depth() == 8:
+                if self.mi.bit_depth == 8:
                     params['profile:v'] = 'high'
                 else:
                     params['profile:v'] = 'high10'
@@ -134,7 +135,7 @@ class YouTube:
                     #'tier': 'high',
                     #'profile:v' 'high',
                 }
-                if self.mi.bit_depth() == 10:
+                if self.mi.bit_depth == 10:
                     params['profile:v'] = 'main10'
             case 'sw':
                 params = {
@@ -145,7 +146,7 @@ class YouTube:
                 if self.args.opencl:
                     params_in['hwaccel'] = 'auto'
                     params['x264opts'] = 'opencl'
-                if self.mi.bit_depth() == 8:
+                if self.mi.bit_depth == 8:
                     filter_v['format'] = 'yuv420p'
                     params['profile:v'] = 'high'
                 else:
@@ -158,9 +159,9 @@ class YouTube:
         if self.args.deint:
             filter_v['bwdif'] = 'mode=send_field:parity=auto:deint=all'
 
-        if self.mi.has_audio():
+        if self.mi.has_audio:
             params['c:a'] = 'aac'
-            channels = self.mi.audio_channels()
+            channels = self.mi.audio_channels
             params['ac'] = str(channels)
             if channels == 1:
                 # force stereo
@@ -171,7 +172,7 @@ class YouTube:
             else:
                 abr = 512
             params['b:a'] = f'{abr}k'
-            if self.mi.audio_sampling_rate() <= 48000:
+            if self.mi.audio_sampling_rate <= 48000:
                 ar = 48000
             else:
                 ar = 96000
@@ -184,7 +185,7 @@ class YouTube:
             mr = f'{int(self.vbitrate*1.2)}M'
             params['maxrate:v'] = mr
             params['bufsize'] =  mr
-        #params['r'] = f'{self.mi.frame_rate()}'
+        #params['r'] = f'{self.mi.frame_rate}'
         #params['g'] = f'{self.gop}'
         params['force_key_frames'] = 'expr:gte(t,n_forced/2)'
         params['flags'] = 'cgop'

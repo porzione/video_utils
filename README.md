@@ -1,6 +1,5 @@
 # `video_utils`
 
-`cpmyvideos.py` copy, scale and convert videos to DNxHR, HEVC, AV1 (WIP)
+`cpmyvideos.py` copy, scale and transcode videos to DNxHR or HEVC
 
 `youtube.py` convert to suitable YouTube format
-
