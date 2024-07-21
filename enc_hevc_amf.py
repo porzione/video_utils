@@ -18,6 +18,7 @@ class Encoder:
             'qp_p': vid.crf,
             'qp_i': vid.crf,
             'profile_tier': 'high',
+            'level': '5.2',
         }
         self.bits = vid.bits
         self.fmt = f'{vid.color_format}p'

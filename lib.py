@@ -8,11 +8,10 @@ from typing import Optional
 ENCODERS = ('x265', 'amf', 'vaapi', 'nv', 'nvenc', 'vceenc')
 CRF = {
     'hevc': 18,    # default 28, 0-51
-    'av1': 20,     # default 35
     'nv': 19,      # default -1, vbr/cq
     'nvenc': 19,   # default 23
-    'vaapi': 21,   # default 0,25 for ~same size/br as sw, 0-52, CQP/qp
-    'amf': 21,     # default -1, CQP/qp_X,
+    'vaapi': 20,   # default 0,25 for ~same size/br as sw, 0-52, CQP/qp
+    'amf': 20,     # default -1, CQP/qp_X,
     'vceenc': 20,  # default 22:24:27
 }
 # FRAME_RATES = (23.98 24 25 29.97 30 50 59.94 60 120 150 180)

@@ -15,7 +15,6 @@ import enc_dnxhr
 
 # 1920x1080 2560x1440 3840x2160
 RESOLUTIONS = (1080, 1440, 2160)
-DEF_RES = 1440
 
 FORMATS = ('dnxhr', 'hevc')
 FORMAT_EXTENSIONS = {
@@ -31,11 +30,7 @@ parser.add_argument('-s', '--srcdir', help='Source directory')
 parser.add_argument('-d', '--dstdir', help='Destination directory')
 parser.add_argument('-n', '--newer', help='Newer than')
 parser.add_argument('--copy', action='store_true', help='Copy as is')
-#parser.add_argument('-y', action='store_true', help='Overwrite')
-parser.add_argument('--dns', action='store_true',
-                    help=f'Do Not Scale to {DEF_RES}')
-parser.add_argument('--res', default=DEF_RES, type=int,
-                    choices=RESOLUTIONS,
+parser.add_argument('--res', type=int, choices=RESOLUTIONS,
                     help='Resolution (%(default)s)')
 parser.add_argument('--fmt', default='hevc', choices=FORMATS,
                     help='Target format (%(default)s)')
@@ -88,7 +83,7 @@ def transcode(src, dst, info, enc_mod):
         color_format = info.color_format,
         frame_rate = info.frame_rate,
         dnx = args.dnx,
-        res = args.res,
+        res = args.res or info.width,
         color_primaries = info.color_primaries,
         matrix_coefficients = info.matrix_coefficients,
         transfer_characteristics = info.transfer_characteristics,
@@ -103,7 +98,7 @@ def transcode(src, dst, info, enc_mod):
     filter_v = []
     if hasattr(encoder, 'get_filter'):
         filter_v.append(encoder.get_filter())
-    if info.height > args.res and not args.dns:
+    if args.res and args.res < info.height:
         if hasattr(encoder, 'scale'):
             filter_v.append(encoder.scale())
         else:
@@ -198,10 +193,9 @@ for filename in os.listdir(args.srcdir):
 
         mi = MyMediaInfo(src_file)
 
-        if args.dns:
-            args.res = mi.height
         debug = []
-        debug.append(f'res: {args.res}')
+        if args.res:
+            debug.append(f'res: {args.res}')
 
         ext = FORMAT_EXTENSIONS.get(args.fmt)
         base_name = os.path.splitext(filename)[0]
@@ -215,7 +209,7 @@ for filename in os.listdir(args.srcdir):
                 base_name += f'_crf{crf}'
             if args.bits:
                 base_name += f'_bit{args.bits}'
-            if mi.height > args.res and not args.dns:
+            if args.res and args.res < mi.height:
                 base_name += f'_res{args.res}'
             else:
                 base_name += f'_res{mi.height}'

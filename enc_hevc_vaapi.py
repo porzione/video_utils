@@ -40,6 +40,9 @@ class Encoder:
     def get_params(self):
         return self.params
 
+    def get_filter(self):
+        return 'hwupload'
+
     def scale(self):
         flt = []
         if self.bits == 10:
