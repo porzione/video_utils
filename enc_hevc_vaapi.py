@@ -41,12 +41,14 @@ class Encoder:
         return self.params
 
     def get_filter(self):
-        return 'hwupload'
+        flt = []
+        if self.bits == 10:
+            flt.append('format=p010')
+        flt.append('hwupload')
+        return ','.join(flt)
 
     def scale(self):
         flt = []
-        if self.bits == 10:
-            flt.append('format=p010,hwupload')
         if self.res:
             flt.append(f'scale_vaapi=w=-1:h={self.res}:mode=hq:force_original_aspect_ratio=1')
         return ','.join(flt)
