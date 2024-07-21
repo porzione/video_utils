@@ -201,7 +201,11 @@ for filename in os.listdir(args.srcdir):
         base_name = os.path.splitext(filename)[0]
         if args.fnparams:
             if args.fmt == 'dnxhr':
-                dnxp = args.dnx or enc_dnxhr.DEFAULT_PROFILE
+                if args.dnx:
+                    dnxp = args.dnx
+                else:
+                    idx = f'{mi.color_format}:{mi.bit_depth}'
+                    dnxp = enc_dnxhr.PROFILES_AUTO[idx]
                 base_name += f'_{args.fmt}_{dnxp}'
             else:
                 base_name += f'_{args.fmt}_{args.enc}'
@@ -229,7 +233,7 @@ for filename in os.listdir(args.srcdir):
             debug.append(f'crf: {crf}')
         if args.preset:
             debug.append(f'preset: {args.preset}')
-        if args.fmt == 'dnxhr' and dnxp:
+        if args.fmt == 'dnxhr' and args.dnx:
             debug.append(f'DNxHR profile: {dnxp}')
         print('\n'.join(map(lambda s: f'> {s}', debug)))
         mi.print()

@@ -2,11 +2,8 @@
 Avid DNXHR
 
 https://dovidenko.com/2019/999/ffmpeg-dnxhd-dnxhr-mxf-proxies-and-optimized-media.html
-https://avidtech.my.salesforce-sites.com/pkb/articles/en_US/White_Paper/DNxHR-Codec-Bandwidth-Specifications
+https://avidtech.my.salesforce-sites.com/pkb/articles/en_US/Knowledge/DNxHR-Codec-Bandwidth-Specifications
 https://kb.avid.com/pkb/articles/en_US/Knowledge/Avid-Qualified-Video-Rates-Rasters-and-Codecs-for-Pro-Tools
-
-https://web.archive.org/web/20240110012221/https://avidtech.my.salesforce-sites.com/pkb/articles/en_US/White_Paper/DNxHR-Codec-Bandwidth-Specifications
-https://web.archive.org/web/20240511153722/https://avidtech.my.salesforce-sites.com/pkb/articles/en_US/Knowledge/DNxHR-Codec-Bandwidth-Specifications?retURL=%2Fpkb%2Farticles%2Fen_US%2FWhite_Paper%2FDNxHR-Codec-Bandwidth-Specifications&popup=true
 
 Supported pixel formats: yuv422p yuv422p10le yuv444p10le gbrp10le
 """
@@ -17,12 +14,17 @@ PROFILES = {
     'hqx':  'yuv422p10le', # UHD/4K Broadcast-quality. 5.5:1
     '444':  'yuv444p10le', # Cinema-quality. 4.5:1
 }
-DEFAULT_PROFILE = 'hqx'
+PROFILES_AUTO = {
+    'yuv420:8':  'hq',
+    'yuv422:8':  'hq',
+    'yuv420:10': 'hqx',
+    'yuv422:10': 'hqx',
+}
 
 class Encoder:
 
     def __init__(self, vid):
-        self.profile = vid.dnx if vid.dnx else DEFAULT_PROFILE
+        self.profile = vid.dnx if vid.dnx else PROFILES_AUTO[vid.idx()]
         self.params = {
             'c:v': 'dnxhd',
             'profile:v': f'dnxhr_{self.profile}'
