@@ -51,6 +51,8 @@ class Encoder:
             '-mv-precision': 'Q-pel',
 
         }
+        if vid.gop:
+            self.params['-gop-len'] = vid.gop
         if vid.color_primaries:
             self.params['-colorprim'] = COLORS[vid.color_primaries]
         if vid.transfer_characteristics:

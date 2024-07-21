@@ -43,6 +43,8 @@ class Encoder:
             '-output-depth': vid.bits,
             '-output-buf': OUTPUT_BUFFER,
         }
+        if vid.gop:
+            self.params['-gop-len'] = vid.gop
         if vid.color_primaries:
             self.params['-colorprim'] = COLORS[vid.color_primaries]
         if vid.transfer_characteristics:

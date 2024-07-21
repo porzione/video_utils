@@ -26,6 +26,7 @@ class Video:
     bits: Optional[int] = None
     bits_in: Optional[int] = None
     crf: Optional[int] = None
+    gop: Optional[int] = None
     preset: Optional[str] = None
     params: Optional[str] = None
     tune: Optional[str] = None
@@ -36,6 +37,12 @@ class Video:
 
     def idx(self):
         return f'{self.color_format}:{self.bits}'
+
+def gop(frame_rate, gop_mul):
+    if gop_mul:
+        return int(float(frame_rate) * gop_mul)
+    else:
+        return None
 
 def format_time(seconds):
     if seconds < 60:

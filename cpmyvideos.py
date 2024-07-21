@@ -42,6 +42,8 @@ parser.add_argument('--fmt', default='hevc', choices=FORMATS,
 parser.add_argument('--preset', help='Preset HEVC/NVENC')
 parser.add_argument('--tune', help='Tune HEVC/NVENC')
 parser.add_argument('--crf', type=int, help=f'crf/quality ({lib.CRF})')
+parser.add_argument('--gop', type=float,
+                    help='gop, float multiplier of fps')
 parser.add_argument('--params', help='Params HEVC')
 parser.add_argument('--dnx', choices=enc_dnxhr.PROFILES.keys(),
                     help='DNxHR profile')
@@ -79,6 +81,7 @@ def transcode(src, dst, info, enc_mod):
         bits = args.bits or 10,
         bits_in = info.bit_depth,
         crf = crf,
+        gop = lib.gop(info.frame_rate, args.gop),
         params = args.params,
         preset = args.preset,
         tune = args.tune,
@@ -220,6 +223,8 @@ for filename in os.listdir(args.srcdir):
                 base_name += f'_p-{args.preset}'
             if args.tune:
                 base_name += f'_tun={args.tune}'
+            if args.gop:
+                base_name += f'_gop{lib.gop(mi.frame_rate, args.gop)}'
         dst_file = os.path.join(args.dstdir, f'{base_name}.{ext}')
         if os.path.exists(dst_file):
             print(f'EXISTS {dst_file}')

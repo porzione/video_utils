@@ -42,7 +42,9 @@ class Encoder:
         }
         if vid.tune:
             self.params['tune'] = vid.tune
-        x265params = ['open-gop=0']
+        x265params = ['open-gop=1']
+        if vid.gop:
+            x265params.append(f'keyint={vid.gop}')
         if vid.params:
             x265params.append(f'{vid.params}')
         self.params['x265-params'] = ':'.join(x265params)
