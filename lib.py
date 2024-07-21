@@ -41,8 +41,7 @@ class Video:
 def gop(frame_rate, gop_mul):
     if gop_mul:
         return int(float(frame_rate) * gop_mul)
-    else:
-        return None
+    return None
 
 def format_time(seconds):
     if seconds < 60:
