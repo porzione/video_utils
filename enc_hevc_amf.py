@@ -6,8 +6,11 @@ https://github.com/GPUOpen-LibrariesAndSDKs/AMF/wiki/FFmpeg-and-AMF-HW-Accelerat
 
 Supported pixel formats: nv12 yuv420p
 """
+from lib import BaseEncoder
 
-class Encoder:
+class Encoder(BaseEncoder):
+
+    can_scale = False
 
     def __init__(self, vid):
         self.params = {
@@ -18,7 +21,7 @@ class Encoder:
             'qp_p': vid.crf,
             'qp_i': vid.crf,
             'profile_tier': 'high',
-            'level': '5.2',
+            'level': '5.1',
         }
         self.bits = vid.bits
         self.fmt = f'{vid.color_format}p'
@@ -28,5 +31,5 @@ class Encoder:
     def get_params(self):
         return self.params
 
-    def get_filter(self):
-        return f'format={self.fmt}'
+    def get_filter(self, *args, scale=None, **kwargs):
+        return [{'format': self.fmt}]

@@ -6,9 +6,12 @@ https://docs.nvidia.com/video-technologies/video-codec-sdk/12.1/nvenc-preset-mig
 https://developer.nvidia.com/blog/calculating-video-quality-using-nvidia-gpus-and-vmaf-cuda/
 https://developer.nvidia.com/blog/nvidia-ffmpeg-transcoding-guide/
 
+hwupload_cuda filter: uploading the data from system to GPU memory using
+
 Supported pixel formats: yuv420p nv12 p010le yuv444p p016le yuv444p16le
 bgr0 bgra rgb0 rgba x2rgb10le x2bgr10le gbrp gbrp16le cuda
 """
+from lib import BaseEncoder
 
 PRESETS = {
     1080: 'p6',
@@ -19,7 +22,7 @@ DEFAULT_PRESET = 'p6'
 DEFAULT_TUNE='hq'
 PARAMS_IN = {
     # vdpau cuda vaapi qsv drm opencl vulkan
-    'hwaccel': 'nvdec',
+    'hwaccel': 'cuda',
     # keeps the decoded frames in GPU memory
     'hwaccel_output_format': 'cuda'
 }
@@ -30,10 +33,11 @@ FORMATS = {
     'yuv422:10': 'yuv444p16le',
 }
 
-class Encoder:
+class Encoder(BaseEncoder):
+    can_scale = True
 
     def __init__(self, vid):
-        #print(f'hevc_nvenc idx:{vid.idx()}')
+        print(f'hevc_nvenc idx:{vid.idx()}')
 
         self.params = {
             'c:v': 'hevc_nvenc',
@@ -47,7 +51,7 @@ class Encoder:
             'tier': 'high',
             'profile:v': 'main10' if vid.bits == 10 else 'main',
         }
-        self.bits = vid.bits
+        self.bits_in = vid.bits_in
         self.res = vid.res
         self.idx = vid.idx()
 
@@ -57,9 +61,14 @@ class Encoder:
     def get_params(self):
         return self.params
 
-    def scale(self):
-        flt = ['hwupload_cuda']
-        scale = f'scale_cuda=w=-1:h={self.res}:interp_algo=lanczos'
-        scale += f':format={FORMATS[self.idx]}'
-        flt.append(scale)
-        return ','.join(flt)
+    def get_filter(self, *args, scale=None, **kwargs):
+        flt = []
+        # NVDec H.264/AVC: nv12, yv12 ONLY
+        if self.bits_in == 10:
+            flt.append('hwupload_cuda')
+        sparams = []
+        if scale:
+            sparams.append(f'w=-1:h={self.res}:interp_algo=lanczos')
+        sparams.append(f'format={FORMATS[self.idx]}')
+        flt.append({'scale_cuda': ':'.join(sparams)})
+        return flt

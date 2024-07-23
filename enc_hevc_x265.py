@@ -7,6 +7,7 @@ Supported pixel formats: yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p
 gbrp yuv420p10le yuv422p10le yuv444p10le gbrp10le yuv420p12le yuv422p12le yuv444p12le
 gbrp12le gray gray10le gray12le
 """
+from lib import BaseEncoder
 
 PRESETS = {
     1080: 'medium',
@@ -29,7 +30,9 @@ PROFILES = {
     'yuv422:10': 'main422-10',
 }
 
-class Encoder:
+class Encoder(BaseEncoder):
+
+    can_scale = False
 
     def __init__(self, vid):
         print(f'x265 idx: {vid.idx()}')
@@ -49,10 +52,10 @@ class Encoder:
             x265params.append(f'{vid.params}')
         self.params['x265-params'] = ':'.join(x265params)
 
-        self.flt = [f'format={FORMATS[vid.idx()]}']
+        self.idx = vid.idx()
 
     def get_params(self):
         return self.params
 
-    def get_filter(self):
-        return ','.join(self.flt)
+    def get_filter(self, *args, scale=None, **kwargs):
+        return [{'format': FORMATS[self.idx]}]

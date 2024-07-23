@@ -10,7 +10,12 @@ Max Bframes  5
 Max Level    186 (6.2)
 4:4:4        yes
 10bit depth  yes
+
+NVDec features
+  H.264/AVC:  nv12, yv12
+  H.265/HEVC: nv12, yv12, yv12(10bit), yv12(12bit), yuv444, yuv444(10bit), yuv444(12bit)
 """
+from lib import BaseEncoder
 
 OUTPUT_BUFFER = 64
 
@@ -32,9 +37,10 @@ COLORS = {
     # smpte2084 bt2020nc bt2020c
 }
 
-class Encoder:
+class Encoder(BaseEncoder):
 
     CMD = ['nvencc']
+    can_scale = True
 
     def __init__(self, vid):
         #print(f'nvenc idx: {vid.idx()}')
@@ -64,5 +70,7 @@ class Encoder:
     def get_params(self):
         return self.params
 
-    def scale(self):
+    def get_filter(self, *args, scale=None, **kwargs):
+        if not scale:
+            return {}
         return ['--output-res', f'-2x{self.res}', '--vpp-resize', 'lanczos3']

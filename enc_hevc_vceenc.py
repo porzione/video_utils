@@ -13,6 +13,7 @@ max streams:     16
 timeout support: yes
 smart access:    no
 """
+from lib import BaseEncoder
 
 OUTPUT_BUFFER = 32
 PROFILES = {
@@ -27,9 +28,10 @@ COLORS = {
 }
 
 
-class Encoder:
+class Encoder(BaseEncoder):
 
     CMD = ['vceencc', '--avsw']
+    can_scale = True
 
     def __init__(self, vid):
         #print(f'hevc_vceenc idx:{vid.idx()}')
@@ -56,5 +58,7 @@ class Encoder:
     def get_params(self):
         return self.params
 
-    def scale(self):
+    def get_filter(self, *args, scale=None, **kwargs):
+        if not scale:
+            return {}
         return ['--output-res', f'-2x{self.res}', '--vpp-resize', 'lanczos3']

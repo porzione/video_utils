@@ -84,13 +84,20 @@ class MyMediaInfo:
         print(f'Bit depth: {self.bit_depth}')
         print(f'Format: {self.format}')
         print(f'Format profile: {self.format_profile}')
-        print(f'Format settings: {self.format_settings}')
-        print(f'Color format: {self.color_format}')
-        print(f'Color primaries: {self.color_primaries}')
-        print(f'Matrix coefficients: {self.matrix_coefficients}')
-        print(f'Transfer characteristics: {self.transfer_characteristics}')
-        print(f'Color range: {self.color_range}')
+        if self.format_settings:
+            print(f'Format settings: {self.format_settings}')
+        if self.color_format:
+            print(f'Color format: {self.color_format}')
+        if self.color_primaries:
+            print(f'Color primaries: {self.color_primaries}')
+        if self.matrix_coefficients:
+            print(f'Matrix coefficients: {self.matrix_coefficients}')
+        if self.transfer_characteristics:
+            print(f'Transfer characteristics: {self.transfer_characteristics}')
+        if self.color_range:
+            print(f'Color range: {self.color_range}')
         print(f'Scan: {self.video_track.scan_type}')
-        print(f'Audio format: {self.audio_format}')
-        print(f'Audio sampling rate: {self.audio_sampling_rate}')
-        print(f'Audio channels: {self.audio_channels}')
+        if self.audio_track:
+            print(f'Audio format: {self.audio_format}')
+            print(f'Audio sampling rate: {self.audio_sampling_rate}')
+            print(f'Audio channels: {self.audio_channels}')

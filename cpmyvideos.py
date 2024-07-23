@@ -17,10 +17,6 @@ import enc_dnxhr
 RESOLUTIONS = (1080, 1440, 2160)
 
 FORMATS = ('dnxhr', 'hevc')
-FORMAT_EXTENSIONS = {
-    'hevc': 'MOV',
-    'dnxhr': 'MOV',
-}
 # downscale: Lanczos/Spline, upscale: Bicubic/Lanczos
 # error diffusion dithering to minimize banding +dither=error_diffusion
 DSCALE_FLAGS = 'flags=lanczos+accurate_rnd+full_chroma_int'
@@ -95,14 +91,11 @@ def transcode(src, dst, info, enc_mod):
     else:
         cmd = ['ffmpeg', '-hide_banner', '-nostdin', '-ignore_editlist', '1']
 
-    filter_v = []
-    if hasattr(encoder, 'get_filter'):
-        filter_v.append(encoder.get_filter())
-    if args.res and args.res < info.height:
-        if hasattr(encoder, 'scale'):
-            filter_v.append(encoder.scale())
-        else:
-            filter_v.append(f'scale=w=-1:h={args.res}:{DSCALE_FLAGS}')
+    need_scale = args.res and args.res < info.height
+    filter_v = encoder.get_filter(scale=need_scale)
+    if need_scale and not encoder.can_scale:
+        filter_v.append({'scale': f'w=-1:h={args.res}:{DSCALE_FLAGS}'})
+    #print(f'filter_v: {filter_v}')
 
     params = encoder.get_params()
 
@@ -147,9 +140,12 @@ def transcode(src, dst, info, enc_mod):
     # filters
     if filter_v:
         if hasattr(encoder, 'CMD'):
-            cmd.extend(*filter_v)
+            cmd.extend(filter_v)
         else:
-            cmd.extend(['-filter:v', ','.join(filter_v)])
+            items = lib.join_filters(filter_v)
+            #print(f'items: {items} from filter_v: {filter_v}')
+            cmd.extend(['-filter:v', items])
+    #print(cmd) ; return 0
 
     # output
     if args.duration:
@@ -176,7 +172,6 @@ if args.fmt == 'dnxhr':
     ENC_MOD = enc_dnxhr
 elif args.fmt == 'hevc':
     ENC_MOD = importlib.import_module(f'enc_{args.fmt}_{args.enc}')
-
 else:
     raise ValueError(f"Unsupported encoder format/type: {args.fmt}{args.enc}")
 
@@ -197,7 +192,6 @@ for filename in os.listdir(args.srcdir):
         if args.res:
             debug.append(f'res: {args.res}')
 
-        ext = FORMAT_EXTENSIONS.get(args.fmt)
         base_name = os.path.splitext(filename)[0]
         if args.fnparams:
             if args.fmt == 'dnxhr':
@@ -223,7 +217,7 @@ for filename in os.listdir(args.srcdir):
                 base_name += f'_tun={args.tune}'
             if args.gop:
                 base_name += f'_gop{lib.gop(mi.frame_rate, args.gop)}'
-        dst_file = os.path.join(args.dstdir, f'{base_name}.{ext}')
+        dst_file = os.path.join(args.dstdir, f'{base_name}.MOV')
         if os.path.exists(dst_file):
             print(f'EXISTS {dst_file}')
             if not args.dry:
@@ -233,7 +227,7 @@ for filename in os.listdir(args.srcdir):
             debug.append(f'crf: {crf}')
         if args.preset:
             debug.append(f'preset: {args.preset}')
-        if args.fmt == 'dnxhr' and args.dnx:
+        if args.fmt == 'dnxhr' and dnxp:
             debug.append(f'DNxHR profile: {dnxp}')
         print('\n'.join(map(lambda s: f'> {s}', debug)))
         mi.print()

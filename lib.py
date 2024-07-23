@@ -16,6 +16,16 @@ CRF = {
 }
 # FRAME_RATES = (23.98 24 25 29.97 30 50 59.94 60 120 150 180)
 
+class BaseEncoder:
+
+    ERROR = "Method should be overridden in subclasses"
+
+    def get_filter(self, *args, scale=None, **kwargs):
+        raise NotImplementedError(self.ERROR)
+
+    def get_params(self):
+        raise NotImplementedError(self.ERROR)
+
 @dataclass
 class Video:
     # pylint: disable=too-many-instance-attributes
@@ -41,6 +51,20 @@ def gop(frame_rate, gop_mul):
     if gop_mul:
         return int(float(frame_rate) * gop_mul)
     return None
+
+def join_filters(filters):
+    result = []
+    for filter_item in filters:
+        if isinstance(filter_item, str):
+            result.append(filter_item)
+        elif isinstance(filter_item, dict):
+            for key, value in filter_item.items():
+                if isinstance(value, dict):
+                    sub_items = [f"{k}={v}" for k, v in value.items()]
+                    result.append(f"{key}=" + ":".join(sub_items))
+                else:
+                    result.append(f"{key}={value}")
+    return ",".join(result)
 
 def format_time(seconds):
     if seconds < 60:
