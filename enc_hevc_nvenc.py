@@ -3,6 +3,8 @@ Nvidia rigaya/NVEnc
 
 https://github.com/rigaya/NVEnc/blob/master/NVEncC_Options.en.md
 
+lut: --vpp-colorspace lut3d=<path> lut3d_interp=<string>
+
 output-csp yuv420(default), yuv444
 RTX 3060
 RC Modes     CQP, CBR, CBRHQ, VBR, VBRHQ
@@ -59,6 +61,8 @@ class Encoder(BaseEncoder):
         }
         if vid.gop:
             self.params['-gop-len'] = vid.gop
+        #if vid.all_i:
+        #    self.params['-gop-len'] = 1
         if vid.color_primaries:
             self.params['-colorprim'] = COLORS[vid.color_primaries]
         if vid.transfer_characteristics:

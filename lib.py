@@ -6,14 +6,27 @@ from dataclasses import dataclass
 from typing import Optional
 
 ENCODERS = ('x265', 'amf', 'vaapi', 'nv', 'nvenc', 'vceenc')
+
+# 1920x1080 2560x1440 3840x2160
+RESOLUTIONS = (1080, 1440, 2160)
+
+FORMATS = ('dnxhr', 'prores', 'cineform', 'hevc')
+
 CRF = {
-    'hevc': 18,    # default 28, 0-51
+    'hevc': 19,    # default 28, 0-51, slow 19: 98.39, 20.2: 97.95, 21.2: 97.53, 22: 97.16
     'nv': 19,      # default -1, vbr/cq
     'nvenc': 19,   # default 23
-    'vaapi': 20,   # default 0,25 for ~same size/br as sw, 0-52, CQP/qp
-    'amf': 20,     # default -1, CQP/qp_X,
+    'vaapi': 21,   # default 0, 21: 99.16, 24: 98.12, 25: 97.79
+                   # QCP 22: 98.94, 19: 99.49, 20: 99.34
+    'amf': 18,     # default -1,
     'vceenc': 20,  # default 22:24:27
+    # svt-av1: 21, # 21: 98.56, 29: 97.22
 }
+
+# downscale: Lanczos/Spline, upscale: Bicubic/Lanczos
+# error diffusion dithering to minimize banding +dither=error_diffusion
+DSCALE_FLAGS = 'flags=lanczos+accurate_rnd+full_chroma_int'
+
 # FRAME_RATES = (23.98 24 25 29.97 30 50 59.94 60 120 150 180)
 
 class BaseEncoder:
@@ -39,10 +52,11 @@ class Video:
     preset: Optional[str] = None
     params: Optional[str] = None
     tune: Optional[str] = None
-    dnx: Optional[str] = None
+    profile: Optional[str] = None
     color_primaries: Optional[str] = None
     matrix_coefficients: Optional[str] = None
     transfer_characteristics: Optional[str] = None
+    all_i: Optional[bool] = None
 
     def idx(self):
         return f'{self.color_format}:{self.bits}'

@@ -42,7 +42,7 @@ class YouTube:
         self.args = parser.parse_args()
 
         if not self.args.enc in ENCODERS:
-            raise ValueError(f"Bad encoder '{self.args.enc}', use one of {ENCODERS}")
+            sys.exit(f"Bad encoder '{self.args.enc}', use one of {ENCODERS}")
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         conf_path = os.path.join(script_dir, 'youtube.json')

@@ -12,6 +12,8 @@ pre analysis:    yes
 max streams:     16
 timeout support: yes
 smart access:    no
+
+lut: --vpp-colorspace lut3d=<path> lut3d_interp=<string>
 """
 from lib import BaseEncoder
 

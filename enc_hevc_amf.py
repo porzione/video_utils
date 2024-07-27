@@ -17,6 +17,7 @@ class Encoder(BaseEncoder):
             'c:v': 'hevc_amf',
             'usage': 'lowlatency_high_quality',
             'quality': 'quality',
+            # 'profile': 'main',
             'rc:v': 'cqp',
             'qp_p': vid.crf,
             'qp_i': vid.crf,

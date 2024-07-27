@@ -7,6 +7,7 @@ https://kb.avid.com/pkb/articles/en_US/Knowledge/Avid-Qualified-Video-Rates-Rast
 
 Supported pixel formats: yuv422p yuv422p10le yuv444p10le gbrp10le
 """
+import sys
 from lib import BaseEncoder
 
 PROFILES = {
@@ -28,7 +29,13 @@ class Encoder(BaseEncoder):
     can_scale = False
 
     def __init__(self, vid):
-        self.profile = vid.dnx if vid.dnx else PROFILES_AUTO[vid.idx()]
+        if vid.profile:
+            if vid.profile not in PROFILES:
+                sys.exit(f'bad profile {vid.profile} not: '
+                         f'{" ".join(PROFILES.keys())}')
+            self.profile = vid.profile
+        else:
+            self.profile =PROFILES_AUTO[vid.idx()]
         self.params = {
             'c:v': 'dnxhd',
             'profile:v': f'dnxhr_{self.profile}'

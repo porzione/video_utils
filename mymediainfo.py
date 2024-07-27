@@ -51,9 +51,12 @@ class MyMediaInfo:
             self.format_settings = self.video_track.format_settings
             self.color_primaries = self.video_track.color_space
 
-            cspace = self.video_track.color_space.lower()
-            chroma = self.video_track.chroma_subsampling.replace(':', '')
-            self.color_format = f'{cspace}{chroma}'
+            cf = []
+            if self.video_track.color_space:
+                cf.append(self.video_track.color_space.lower())
+            if self.video_track.chroma_subsampling:
+                cf.append(self.video_track.chroma_subsampling.replace(':', ''))
+            self.color_format = ''.join(cf)
 
             self.width = self.video_track.width
             self.height = self.video_track.height
@@ -81,9 +84,14 @@ class MyMediaInfo:
     def print(self):
         print(f'Video: {self.width}x{self.height} @ {self.frame_rate}')
         print(f'Bit rate: {self.bit_rate}')
-        print(f'Bit depth: {self.bit_depth}')
-        print(f'Format: {self.format}')
-        print(f'Format profile: {self.format_profile}')
+        if self.bit_depth:
+            print(f'Bit depth: {self.bit_depth}')
+        fmt = self.format
+        if self.video_track.codec_id_info:
+            fmt = f'{fmt} ({self.video_track.codec_id_info})'
+        print(f'Format: {fmt}')
+        if self.format_profile:
+            print(f'Format profile: {self.format_profile}')
         if self.format_settings:
             print(f'Format settings: {self.format_settings}')
         if self.color_format:
